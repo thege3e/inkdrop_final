@@ -1,0 +1,420 @@
+﻿<!doctype html>
+<html lang="en" style="overflow:hidden">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compativle" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../css/style.css" type="text/css">
+    <!--Bootstrap icons-->
+    <link rel="stylesheet" href="../library/fontawesome-free-5.8.2-web/css/all.css"  crossorigin="anonymous">
+    <title>Inkdrop | Welcome</title>
+    <!--HTML editor-->
+    <script src="../library/ckeditor/ckeditor.js"></script>
+    
+    <!-- Vuejs -->
+    <script src="../js/vueDoc.js"></script>
+
+    <!-- Splitter.js -->
+    <script src="../../node_modules/split.js/dist/split.min.js"></script>
+    <script src="../../node_modules/split.js/dist/split.js"></script>
+    
+    <!-- Bulma  -->
+    <link rel="stylesheet" href="../library/bulma-0.7.5/css/bulma.min.css">
+    <!-- Bootstrap css and js -->
+    <!-- <link rel="stylesheet" href="bootstrap-3.4.1-dist/css/bootstrap.min.css"> -->
+    <script src="../js/jquery.min.js"></script>
+    <script src="../library/bootstrap-3.4.1-dist/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+    <div class="preloader">
+      
+    </div>
+    <!--Logo, deed hesgiin nav-->
+    <div class="containing">
+      <div class="header">
+        <header>
+            <div>
+                <img src="../images/logoreal.jpg">
+                <h1>Inkdrop</h1>
+                <button class="logout" onClick="localStorage.removeItem('auth-token'); window.location.replace('/')">Log out!</button>
+            </div>
+          <nav class="topNav">
+          </nav>
+        </header>
+      </div>
+      
+      <!--Zuun taliin nav-->
+      <div class="wholeApp">
+        <div class="all-navigators">
+          <aside class='sidebar'>
+            <!-- selector buyu ali book songogdsonii hereglegchid todruulj ogoh div -->
+  
+            <!-- Left navigation iig butneer ni zurj bga heseg -->
+            <div class="ul">
+
+                <div class="addNotebook">
+                    <button onClick="pushChild=null, app.modal=['Create new notebook', null,null,null,'Create',true], $('.modal.sidebar').addClass('is-active')" 
+                            type="button" class="Add" >Add</button>
+    
+                </div>
+
+              <div class="selector"></div> 
+              <div v-for="(sidebar, index) in sidebars"
+                  :class="sidebar.listClass" 
+                  :id="sidebar.bookId"
+                  :key="index"
+                  @click="selectBook(index)">
+                <div :class="{child: (sidebar.bookName==='Trash')}">
+                    <i  :class="sidebar.iconClass"></i>{{sidebar.bookName}}
+                    <div @click.stop="trash($event)" v-if="sidebar.bookName==='Trash'" class="bookPopper">
+                      <i class="fas fa-ellipsis-v" ></i>
+                    </div>
+                    <Sidechild v-if="sidebar.bookId===2 || sidebar.bookId===9" :padding="5" :grandpa="sidebar.bookName"  :index="index" :sidebar='sidebar'></Sidechild>
+                  
+                  </div>
+              </div>
+            </div>
+            
+  
+                  
+  
+                  <div id="sideModal" class="modal sidebar">
+                      <div class="modal-background"></div>
+                      <div class="modal-card"  style="overflow: default">
+                        <header class="modal-card-head" >
+                          <p class="modal-card-title">{{modal[0]}}</p>
+                          <button class="delete" aria-label="close" @click="hideModal('sidebar')"></button>
+                        </header>
+                        <section class="modal-card-body"  style="overflow: default">
+                          <!-- Content ... -->
+                          <input placeholder="Enter notebook name" type="text" @keyup.enter=choose(modal[0])
+                                v-model="bookName" v-if="modal[5]">
+                          
+                          <div class="field" style="margin-top: 0.80rem" v-if="modal[6]">
+                              <div class="control has-icons-left">
+                                <div class="select" style="width: 100%">
+                                  <select style="width: 100%" v-model="selectedTagColor">
+                                    <option v-for="tagColor in tagColors">
+                                        {{tagColor}}
+                                    </option>
+                                  </select>
+                                </div>
+                                <div class="icon is-small is-left">
+                                  <i class="fas fa-circle" :style="{color: selectedTagColor}"></i>
+                                </div>
+                              </div>
+                            </div>
+  
+                          <div v-if="modal[1]" class="description">{{modal[1]}}</div>
+                          <div style="padding: 0.75em 0em 0.25em 0.5em" v-if="modal[2]">
+                            <p class="modalBar" @click="noParentBook()">(No parent)</p>
+                            <Sidechild :sidebar='modal[2]' modal='modal' :padding='0'></Sidechild>
+                          </div>
+                          <p>{{modal[3]}}</p>
+                        </section>
+                        <footer class="modal-card-foot is-large">
+                          <button class="button is-success" v-if="modal[4]" @click="choose(modal[0])">{{modal[4]}}</button>
+                          <button class="button" @click="hideModal('sidebar')">Cancel</button>
+                        </footer>
+                      </div>
+                    </div>
+  
+            </aside>
+            <!--Notes-->
+            <div class="notes" >
+              
+              <div class="note-header">
+                  <sortby :sorts="sorts"></sortby>
+                  <h1  v-if='!finding' class="display-4">{{selectedBookName}}</h1>
+                  <h1  v-else class="display-4">{{count}} notes found</h1>
+                  <span class="icon is-medium">
+                      <i id="blueHover" class="fas fa-edit" @click="addNote()"></i>
+                  </span>
+              </div>
+              
+              <div class="options popover" id='options' data-toggle="popover">
+                  <div v-for="option in options">
+                    <button v-if="option==='Empty'" @click="bookTypes(option)">{{option}}</button>
+                    <button v-else @click="bookTypes(option)" type="button"
+                     data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">
+                    {{option}}</button>
+                  </div>  
+              </div>
+  
+  
+  
+            <br>
+            <div class="control has-icons-right" style="margin: 0 10px">
+              <input class="input is-small" type="email" placeholder="Search"
+                      v-model='search' @keyup="find(search)">
+              <span class="icon is-small is-right">
+                <i class="fas fa-search"></i>
+              </span>
+            </div>
+
+            <hr class='line'>  
+              <div class="notePages">
+                <div class="note"
+                    v-for="(note, index) in sortByTitle"
+                    :key="index"
+                    :id="'Note'+note.noteId"
+                    v-if="(!note.isRemoved && bookId!=3 && ((bookId===note.bookId && note.status<3) || note.titleName.toUpperCase().includes(search.toUpperCase()) || (bookId===null && note.status<3) || note.status===status || (note.tags.includes(lastBook[1]) && lastBook[2]==='Tags'))) || (bookId===3 && note.isRemoved)"
+                    @click="selectNote(index, undefined, note)"
+                    :class="{color2: note.isClicked}">
+                    <!-- parentchild[popchildindex].bookid->bookId   && note.status<3-->
+                  <div class='noteHeader'>
+                      <p v-if="note.titleName===''" class="topic" ><i :class="{'far fa-circle': (note.status===1), 'far fa-pause-circle': (note.status===2),
+                        'fas fa-check-circle': (note.status===3), 'fas fa-times-circle':(note.status===4)}"
+                      ></i>Untitled</p>
+                      <p v-else class="topic"><i :class="{'far fa-circle': (note.status===1), 'far fa-pause-circle': (note.status===2),
+                                            'fas fa-check-circle': (note.status===3), 'fas fa-times-circle':(note.status===4)}"
+                      ></i>{{note.titleName}}</p>
+                      
+                      <div class="dropdown is-right callOptions" :class="'callOptions'+note.noteId">
+                          <div class="dropdown-trigger">
+                              <div class="callOptions" >
+                                  <i  class="fas fa-ellipsis-v" :class="'callImg'+note.noteId" :class="{callOptionsClicked:note.isClicked}"></i>
+                              </div>
+                          </div>
+                          <note-options inline-template>
+                          <div class="dropdown-menu" id="dropdown-menu6" role="menu">
+                            <div class="dropdown-content" id='note-content'>
+                              <div class="dropdown-item" id='note-item'>
+                                  <div class="option" @click="selectOption(option)" v-for='option in options'>
+                                    {{option}}
+                                  </div>
+                              </div>
+                            </div>
+                          </div>
+                        </note-options>
+  
+                        </div>
+  
+                  </div>
+                  <div class="info">  
+                    <div class="head">
+                        <p style="width: 65px" :class="{since: !note.isClicked}">{{note.beautyDate}}</p>
+                          <button v-for="tag in note.tags"
+                          :style="noteTagColor(tag)"
+                          class="AddTag">{{tag}}</button>
+                    </div>          
+                    <p  class="content">{{note.contentHeadline}}
+                    </p>
+                  </div>
+                </div>
+  
+                    
+                <div class="modal moveNote">
+                  <div class="modal-background"></div>
+                  <div class="modal-card">
+                    <header class="modal-card-head">
+                      <p class="modal-card-title">Move to Notebook</p>
+                      <button class="delete" aria-label="close" onClick="$('.modal.moveNote').removeClass('is-active')"></button>
+                    </header>
+                    <section class="modal-card-body">
+                      <!-- Content ... -->
+                      <Sidechild :sidebar='sidebars[1]' moving="moveNote" modal='dropdown' :padding='0'></Sidechild>
+                    </section>
+                    <footer class="modal-card-foot">
+                      <button class="button" onClick="$('.modal.moveNote').removeClass('is-active')">Cancel</button>
+                    </footer>
+                  </div>
+                </div>
+                      
+  
+  
+               </div> 
+  
+            </div>
+      
+        </div>
+        <!--Note board-->
+        <div class="note-board">
+          <div  class="navigate">
+            <div v-if="noteBoard" class='instance'>
+                <div class="header">
+                    <nav>
+                      <ul>
+                        <div class="actions">
+                            <i id="blueHover" data-toggle='tooltip' title='back' class="fas fa-angle-left" @click="toggleNote('left')"></i>
+                            <i id="blueHover" data-toggle='tooltip' title='forward' class="fas fa-angle-right" @click="toggleNote('right')"></i>  
+                        </div>
+                        <li>
+                        
+                          <div class="dropdown  moveNote">
+                            <div class="dropdown-trigger" @click="dropdown('moveNote')">
+                              <div class='book-info' v-if="topicObj.bookId!=3">
+                                  <i style="margin: 0;"></i><i class="fas fa-book" ></i>{{fatherBookName}}<i class="fas fa-caret-down"></i></i>
+                                </div>
+                              <div class='book-info' v-else>
+                                  <i style="margin: 0;"><i class="fas fa-book" ></i>Trash<i class="fas fa-caret-down"></i></i>
+                                </div>
+                              <span class="icon is-small">
+                              </span>
+                            </div>
+                            <div class="dropdown-menu" id="dropdown-menu6" role="menu">
+                              <div class="dropdown-content">
+                                <div id="moveNoteDropdown" class="dropdown-item">
+                                <p style='font-size: 16px; color: grey'>Move this note</p>
+                                <Sidechild :sidebar='childs' modal='dropdown' :padding='0'></Sidechild>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+  
+                        </li>
+                        <li class="date 1">Created:{{createdDate}}</li>
+                        <li class="date 2">Updated:{{updatedDate}}</li>
+                      </ul>
+                    
+                     
+  
+  
+                    <ul class="more">
+                      <li>
+                          <tooltip classing="fas fa-trash-alt" :content="bookId===3? 'Delete note permanently':'Move to trash'"></tooltip>
+                      </li>
+                      <li>
+                        <tooltip v-if="bookId!=3" classing="fas fa-history" content="Revision History"></tooltip>
+  
+                        <div class="modal revision">
+                            <div class="modal-background"></div>
+                            <div class="modal-card">
+                              <header class="modal-card-head">
+                                <p class="modal-card-title">Note Revision History</p>
+                                <button onClick="app.hideModal('revision')" class="delete" aria-label="close"></button>
+                              </header>
+                              <section class="modal-card-body">
+                                <!-- Content ... -->
+                                  <select class="form-control form-control-sm" v-model="selectedHistory">
+                                    <option :value="backup(revision.content, index)" v-for="(revision, index)  in topicObj.revision" 
+                                            :key='index'
+                                            >{{topicObj.revision.length-index}}. {{revision.date}}</option>
+                                    <option v-show="topicObj.revision.length===0" value="null">No revision</option>
+                                  </select>
+                                  <div class='revisionContent' style="height: 200px; overflow: auto"></div>
+                              </section>
+                              <footer class="modal-card-foot">
+                                <button @click='restore()' class="button is-success">Restore</button>
+                                <button class="button" onClick="app.hideModal('revision')">Cancel</button>
+                              </footer>
+                            </div>
+                          </div>
+                      </li>
+                    </ul>
+                    </nav>
+                  </div>
+                  <div class="callPage">
+                      <input class="Topic Placeholder" type="text" placeholder="Untitled" v-model="noteTitle" @keyup="editTopic()">
+                      <div class="adds">
+                          <div class="dropdown giveStat">
+                            <div class="dropdown-trigger">
+                                    <button type="button" aria-hidden="true" class="giveTrig" :class="status[2]"
+                                             @click="dropdown('giveStat')">
+                                            <i :class="status[0]"></i>{{status[1]}}<i class="fas fa-caret-down giveTrig"></i>
+                                    </button>
+                            </div>
+                            <div class="dropdown-menu status" id="dropdown-menu" role="menu">
+                              <div class="dropdown-content" id="stat">
+                                <div class="statHov">
+                                    <button class="popStat" @click="takeStatus(0)" type="button">
+                                        <i style="margin-right: 18px" class=""></i>None</button>
+                                </div>
+                                <div class="statHov">
+                                  <button class="popStat" @click="takeStatus(1)" type="button">
+                                      <i class="far fa-circle"></i>Active</button>
+                                </div>
+                                <div class="statHov">
+                                  <button class="popStat" @click="takeStatus(2)" type="button">
+                                      <i class="far fa-pause-circle"></i>On hold</button>
+                                </div>
+                                <div class="statHov">
+                                  <button class="popStat" @click="takeStatus(3)" type="button">
+                                      <i class="fas fa-check-circle"></i>Completed</button>
+                                </div>
+                                <div class="statHov">
+                                  <button class="popStat" @click="takeStatus(4)" type="button">
+                                      <i class="fas fa-times-circle"></i>Dropped</button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        
+                          <div class="dropdown input-tags" id="input-tags">
+                            <div style="width:100%;" class="dropdown-trigger">
+                              <input class="Tags" v-model="noteTag"  type="text" placeholder="Add tags"
+                                      aria-hidden="true" @keyup.delete="deleteTag(noteTag)" @focus="targeted=2"  @keyup="tagDrop(noteTag)" @keyup.enter="dropToTag(noteTag, false)"/>  
+                            </div>
+                            <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                              <div class="dropdown-content" id="tags">
+                                <div v-show="noTag" style="padding: 5px 7px">No tags matched</div>
+                                <div class='selectTag' v-for='tag in tags' v-if="tag.bookName.toUpperCase().includes(searching.toUpperCase())" @click="dropToTag(tag.bookName, true)">
+                                  <i style="font-size:9px;" :class="tag.iconClass+' '+tag.bookName+'C'"></i>
+                                  {{tag.bookName}}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class='drawTag'>
+                              <button v-for="(numb, index) in numbs"
+                              :key="index"
+                              :style="noteTagColor(numb, index)"
+                              :class="numb+'C'"
+                              class="AddTag">{{numb}}</button>
+                          </div>
+                          
+                      </div>
+  
+                      </div>
+                  </div>
+                  <div class='askNote' v-else>Press +,= key to create new note</div>
+                </div>
+              
+                <div class="board">
+                  <form id='form1' runat='server'>
+                      <textarea id="textarea" style="background: rgb(185, 185, 185) !important" id="textarea" placeholder="Just start typing..."></textarea>
+                  </form>
+                </div>
+        
+          </div>
+      </div>
+      
+      </div>
+     
+    </div>
+
+
+    
+    <script>
+      var editor = CKEDITOR.replace( 'textarea', {
+      });
+    </script>
+    <script src="../js/vue.js"></script>
+ 
+    <!-- Splitter js -->
+    <script>
+      var wholeApp=Split(['.all-navigators', '.note-board'], {
+          sizes: [37, 63],
+          minSize: [411],
+          elementStyle: (dimension, size, gutterSize) => ({
+              'width': `calc(${size}% - ${gutterSize}px)`,
+          }),
+          gutterStyle: (dimension, gutterSize) => ({
+              'width':  `${2}px`,
+          }),
+      })
+      var allNavigators=Split(['aside', '.notes'], {
+          sizes: [45, 55],
+          minSize: [185, 226],
+          elementStyle: (dimension, size, gutterSize) => ({
+              'width': `calc(${size}% - ${gutterSize}px)`,
+          }),
+          gutterStyle: (dimension, gutterSize) => ({
+              'width':  `${2}px`,
+          }),
+      })
+    </script>
+
+  </body>
+</html>

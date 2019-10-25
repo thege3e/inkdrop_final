@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Inkdrop | Login</title>
+  </head>
+  <body>
+    <div class="container">
+      <div v-if="register">Name<input type="text" v-model="name" /></div>
+      <div>Email<input type="email" v-model="email" /></div>
+      <div>Password<input type="password" v-model="password" /></div>
+      <button v-if="!register" class="login" @click="login()">login</button>
+      <button class="register" @click="registerUser()">register</button>
+    </div>
+
+    <script src="../js/vueDoc.js"></script>
+    <script src="../js/jquery.min.js"></script>
+    <script>
+      new Vue({
+        el: ".container",
+        data: {
+          name: "",
+          email: "",
+          password: "",
+          register: false
+        },
+        methods: {
+          login() {
+            console.log("login");
+            const data = {
+              email: this.email,
+              password: this.password
+            };
+            console.log(data);
+            $.ajax({
+              type: "POST",
+              url: "/api/user/login",
+              data: JSON.stringify(data),
+              contentType: "application/json",
+              success: function(token) {
+                console.log("token", token);
+                localStorage.setItem("auth-token", token);
+                $.ajax({
+                  type: "GET",
+                  url: "/",
+                  beforeSend: function(xhr) {
+                    xhr.setRequestHeader("auth-token", token);
+                  },
+                  success: function(data) {
+                    if (data === true) window.location.replace("./index.html");
+                  }
+                });
+              },
+              error: function(err) {
+                console.log(err.responseText);
+              }
+            });
+          },
+          registerUser() {
+            if (!this.register) {
+              this.register = !this.register;
+            } else {
+              this.register = !this.register;
+            }
+            console.log("regis");
+          }
+        },
+        created() {}
+      });
+    </script>
+  </body>
+</html>
