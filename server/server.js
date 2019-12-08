@@ -7,6 +7,7 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const ejs = require("ejs");
+const dbRoute = require("./db/crud");
 
 dotenv.config(); //secret things
 
@@ -34,6 +35,7 @@ app.use(cors());
 
 //import route route
 app.use("/api/user", authRoute);
+app.use("/api/db", dbRoute);
 
 //view engine
 app.set("view engine", "html");

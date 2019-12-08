@@ -11,7 +11,7 @@
       <div v-if="register">Name<input type="text" v-model="name" /></div>
       <div>Email<input type="email" v-model="email" /></div>
       <div>Password<input type="password" v-model="password" /></div>
-      <button v-if="!register" class="login" @click="login()">login</button>
+      <button class="login" @click="login()">login</button>
       <button class="register" @click="registerUser()">register</button>
     </div>
 
@@ -28,41 +28,65 @@
         },
         methods: {
           login() {
-            console.log("login");
-            const data = {
-              email: this.email,
-              password: this.password
-            };
-            console.log(data);
-            $.ajax({
-              type: "POST",
-              url: "/api/user/login",
-              data: JSON.stringify(data),
-              contentType: "application/json",
-              success: function(token) {
-                console.log("token", token);
-                localStorage.setItem("auth-token", token);
-                $.ajax({
-                  type: "GET",
-                  url: "/",
-                  beforeSend: function(xhr) {
-                    xhr.setRequestHeader("auth-token", token);
-                  },
-                  success: function(data) {
-                    if (data === true) window.location.replace("./index.html");
-                  }
-                });
-              },
-              error: function(err) {
-                console.log(err.responseText);
-              }
-            });
+            if (this.register) {
+              this.register = !this.register;
+            } else {
+              console.log("login");
+              const data = {
+                email: this.email,
+                password: this.password
+              };
+              console.log(data);
+              $.ajax({
+                type: "POST",
+                url: "/api/user/login",
+                data: JSON.stringify(data),
+                contentType: "application/json",
+                success: function(token) {
+                  console.log("token", token);
+                  localStorage.setItem("auth-token", token);
+                  $.ajax({
+                    type: "GET",
+                    url: "/",
+                    beforeSend: function(xhr) {
+                      xhr.setRequestHeader("auth-token", token);
+                    },
+                    success: function(data) {
+                      if (data === true)
+                        window.location.replace("./index.html");
+                    }
+                  });
+                },
+                error: function(err) {
+                  console.log(err.responseText);
+                  alert(err.responseText);
+                }
+              });
+            }
           },
           registerUser() {
             if (!this.register) {
               this.register = !this.register;
             } else {
-              this.register = !this.register;
+              let data = {
+                name: this.name,
+                email: this.email,
+                password: this.password
+              };
+              $.ajax({
+                type: "POST",
+                url: "/api/user/register",
+                data: JSON.stringify(data),
+                contentType: "application/json",
+                success: function(data) {
+                  console.log(data);
+                  this.register = !this.register;
+                },
+                error: function(err) {
+                  console.log(err.responseText);
+                  alert(err.responseText);
+                }
+              });
             }
             console.log("regis");
           }
